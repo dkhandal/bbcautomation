@@ -4,7 +4,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -27,6 +32,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 
 
+
 public class BbcAutomation {
 	
 	  // WebDriver object
@@ -34,7 +40,7 @@ public class BbcAutomation {
 	  static WebDriver driver;
 	  static long timeOutInSeconds = 180; //3 minute
 //	  static long timeOutSecuringCC = 15000; // 15 seconds
-	  static boolean isHeadlessRequired = false; // Please true if headless is required
+	  static boolean isHeadlessRequired = true; // Please true if headless is required
 	  static boolean isDisableFirefoxLog = true; // If this is true then will now show firefox logs otherwise will show.
 	  private static String OS = System.getProperty("os.name").toLowerCase();
 	  private static final String screenshotFolderPath = new File("./screenshots").getAbsolutePath();
@@ -46,6 +52,8 @@ public class BbcAutomation {
 	  public static final String FILE_NAME_WRITE_EXCEL_XLS = "BbcAutomation.xls";
 	  public static final String FILE_PATH_EXCEL = "screenshots";
 	  public static final String FILE_SHEET_NAME_WRITE_EXCEL_SHEET = "Sheet1";
+	  static Timer timer = new Timer();
+	  static int i = 0;
 	  
 	  public static boolean isWindows() {
 	      return OS.contains("win");
@@ -329,11 +337,46 @@ public class BbcAutomation {
 	    }
 	  
 	public static void main(String[] args) {
+		
+		timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+              // Your database code here
+                if(i==4){
+                    timer.cancel();
+                    timer.purge();
+                }
+                try {
+                  execute();
+                	System.out.println("Timer Executed: " + i + " - " + getLocalDateTime());
+              } catch (Exception e) {
+                  // TODO Auto-generated catch block
+                  e.printStackTrace();
+              }
+                i++;
 
+            }
+          }, 0, 5*60*1000);
+	}
+	
+	public static String getLocalDateTime() {
+		Date date = new Date();
+		System.out.println("Default Server Date Time: " + date.toString());
+		String format = "MMM dd yyyy hh:mm:ss a";
+		String timeZone = "IST"; // PST // GMT // IST // UTC
+		// create SimpleDateFormat object with input format
+		SimpleDateFormat sdf = new SimpleDateFormat(format);
+		// set timezone to SimpleDateFormat
+		sdf.setTimeZone(TimeZone.getTimeZone(timeZone));
+		String ldtString = sdf.format(date);
+		System.out.println("Local Date Time in " + timeZone + " : " + ldtString);
+		return ldtString;
+	}
+	
+	public static void execute() {
 		bbcAutomation = new BbcAutomation();
 		bbcAutomation.invokeBrowser(callingUrl);
 		bbcAutomation.readUrl();
-		
 	}
 
 }
